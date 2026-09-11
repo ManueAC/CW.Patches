@@ -298,117 +298,117 @@ namespace CW.Bots
             _addBot.Invoke(null, new object[] { new object[] { count.ToString() } });
         }
 
-        internal static void RemovePlayer(object serverPlayer)
-        {
-            if (serverPlayer == null) return;
+        // internal static void RemovePlayer(object serverPlayer)
+        // {
+        //     if (serverPlayer == null) return;
 
-            try
-            {
-                var playerType = serverPlayer.GetType();
+        //     try
+        //     {
+        //         var playerType = serverPlayer.GetType();
 
-                // Method 1: Try to find and call Disconnect on the player
-                var disconnectMethod = playerType.GetMethod("Disconnect",
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (disconnectMethod != null)
-                {
-                    disconnectMethod.Invoke(serverPlayer, null);
-                    Plugin.Log.LogInfo("RemovePlayer: Called Disconnect method");
-                    return;
-                }
+        //         // Method 1: Try to find and call Disconnect on the player
+        //         var disconnectMethod = playerType.GetMethod("Disconnect",
+        //             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        //         if (disconnectMethod != null)
+        //         {
+        //             disconnectMethod.Invoke(serverPlayer, null);
+        //             Plugin.Log.LogInfo("RemovePlayer: Called Disconnect method");
+        //             return;
+        //         }
 
-                // Method 2: Try to find OnLeave or OnPlayerLeave
-                var onLeaveMethod = playerType.GetMethod("OnLeave",
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (onLeaveMethod != null)
-                {
-                    onLeaveMethod.Invoke(serverPlayer, null);
-                    Plugin.Log.LogInfo("RemovePlayer: Called OnLeave method");
-                    return;
-                }
+        //         // Method 2: Try to find OnLeave or OnPlayerLeave
+        //         var onLeaveMethod = playerType.GetMethod("OnLeave",
+        //             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        //         if (onLeaveMethod != null)
+        //         {
+        //             onLeaveMethod.Invoke(serverPlayer, null);
+        //             Plugin.Log.LogInfo("RemovePlayer: Called OnLeave method");
+        //             return;
+        //         }
 
-                // Method 3: Try to set a disconnect flag
-                var connectedField = playerType.GetField("connected",
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (connectedField != null)
-                {
-                    connectedField.SetValue(serverPlayer, false);
-                    Plugin.Log.LogInfo("RemovePlayer: Set connected=false");
-                }
+        //         // Method 3: Try to set a disconnect flag
+        //         var connectedField = playerType.GetField("connected",
+        //             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        //         if (connectedField != null)
+        //         {
+        //             connectedField.SetValue(serverPlayer, false);
+        //             Plugin.Log.LogInfo("RemovePlayer: Set connected=false");
+        //         }
 
-                // Method 4: Try to find network view and destroy it
-                var networkViewField = playerType.GetField("networkView",
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (networkViewField != null)
-                {
-                    var networkView = networkViewField.GetValue(serverPlayer);
-                    if (networkView != null)
-                    {
-                        var nvType = networkView.GetType();
-                        var destroyMethod = nvType.GetMethod("RPC", BindingFlags.Public | BindingFlags.Instance);
-                        if (destroyMethod != null)
-                        {
-                            Plugin.Log.LogInfo("RemovePlayer: Found network view");
-                        }
-                    }
-                }
+        //         // Method 4: Try to find network view and destroy it
+        //         var networkViewField = playerType.GetField("networkView",
+        //             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        //         if (networkViewField != null)
+        //         {
+        //             var networkView = networkViewField.GetValue(serverPlayer);
+        //             if (networkView != null)
+        //             {
+        //                 var nvType = networkView.GetType();
+        //                 var destroyMethod = nvType.GetMethod("RPC", BindingFlags.Public | BindingFlags.Instance);
+        //                 if (destroyMethod != null)
+        //                 {
+        //                     Plugin.Log.LogInfo("RemovePlayer: Found network view");
+        //                 }
+        //             }
+        //         }
 
-                Plugin.Log.LogWarning("RemovePlayer: No suitable removal method found for this player type");
-            }
-            catch (System.Exception e)
-            {
-                Plugin.Log.LogError("RemovePlayer exception: " + e.Message);
-            }
-        }
+        //         Plugin.Log.LogWarning("RemovePlayer: No suitable removal method found for this player type");
+        //     }
+        //     catch (System.Exception e)
+        //     {
+        //         Plugin.Log.LogError("RemovePlayer exception: " + e.Message);
+        //     }
+        // }
 
-        internal static void ResetServer()
-        {
-            try
-            {
-                var game = ServerGame;
-                if (game == null) return;
+        // internal static void ResetServer()
+        // {
+        //     try
+        //     {
+        //         var game = ServerGame;
+        //         if (game == null) return;
 
-                var gameType = game.GetType();
+        //         var gameType = game.GetType();
 
-                // Try to find and clear the players list
-                var playersField = gameType.GetField("players",
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (playersField != null)
-                {
-                    var players = playersField.GetValue(game);
-                    if (players is System.Collections.IList playerList)
-                    {
-                        Plugin.Log.LogInfo($"ResetServer: Found {playerList.Count} players in server list");
-                        // Don't clear it directly - this can crash the game
-                    }
-                }
+        //         // Try to find and clear the players list
+        //         var playersField = gameType.GetField("players",
+        //             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        //         if (playersField != null)
+        //         {
+        //             var players = playersField.GetValue(game);
+        //             if (players is System.Collections.IList playerList)
+        //             {
+        //                 Plugin.Log.LogInfo($"ResetServer: Found {playerList.Count} players in server list");
+        //                 // Don't clear it directly - this can crash the game
+        //             }
+        //         }
 
-                // Try to call a server reset/cleanup method
-                var resetMethod = gameType.GetMethod("Reset",
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (resetMethod != null)
-                {
-                    resetMethod.Invoke(game, null);
-                    Plugin.Log.LogInfo("ResetServer: Called Reset method");
-                    return;
-                }
+        //         // Try to call a server reset/cleanup method
+        //         var resetMethod = gameType.GetMethod("Reset",
+        //             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        //         if (resetMethod != null)
+        //         {
+        //             resetMethod.Invoke(game, null);
+        //             Plugin.Log.LogInfo("ResetServer: Called Reset method");
+        //             return;
+        //         }
 
-                // Try Cleanup method
-                var cleanupMethod = gameType.GetMethod("Cleanup",
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (cleanupMethod != null)
-                {
-                    cleanupMethod.Invoke(game, null);
-                    Plugin.Log.LogInfo("ResetServer: Called Cleanup method");
-                    return;
-                }
+        //         // Try Cleanup method
+        //         var cleanupMethod = gameType.GetMethod("Cleanup",
+        //             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        //         if (cleanupMethod != null)
+        //         {
+        //             cleanupMethod.Invoke(game, null);
+        //             Plugin.Log.LogInfo("ResetServer: Called Cleanup method");
+        //             return;
+        //         }
 
-                Plugin.Log.LogWarning("ResetServer: No reset method found on server game");
-            }
-            catch (System.Exception e)
-            {
-                Plugin.Log.LogError("ResetServer exception: " + e.Message);
-            }
-        }
+        //         Plugin.Log.LogWarning("ResetServer: No reset method found on server game");
+        //     }
+        //     catch (System.Exception e)
+        //     {
+        //         Plugin.Log.LogError("ResetServer exception: " + e.Message);
+        //     }
+        // }
 
         // Add this method to Refl.cs
         internal static void SetPlayerTeam(object serverPlayer, int team)

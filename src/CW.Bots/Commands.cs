@@ -1,7 +1,5 @@
 using CW.Bots.Nav;
 using UnityEngine;
-using System.Reflection;
-using System.Collections.Generic;
 
 namespace CW.Bots
 {
@@ -173,16 +171,6 @@ namespace CW.Bots
             Refl.Print($"botteam: moved bot g{group} to team {(team == 0 ? "Bear" : "USEC")}");
         }
 
-        // private static void ChangeBotTeam(BotAgent agent, int newTeam, object game)
-        // {
-        //     if (agent.Server == null) return;
-        //     var info = Refl.PlayerInfo(agent.Server);
-        //     if (info != null)
-        //     {
-        //         Refl.SetPlayerType(info, newTeam);
-        //         agent.Team = newTeam;
-        //     }
-        // }
         private static void ChangeBotTeam(BotAgent agent, int newTeam, object game)
         {
             if (agent == null || agent.Server == null) return;
@@ -197,72 +185,5 @@ namespace CW.Bots
             Plugin.Log.LogInfo($"Changed bot g{agent.Group} to team {newTeam}");
         }
 
-        // internal static void KickAllBots(string[] args)
-        // {
-        //     var dir = BotDirector.Instance;
-        //     if (dir == null) { Refl.Print("kickbots: director not running"); return; }
-
-        //     int kicked = dir.AgentCount;
-
-        //     // Clear all bot tracking
-        //     dir.Clear();
-
-        //     Refl.Print($"kickbots: removed {kicked} bots from the match");
-        // }
-        // internal static void KickAllBots(string[] args)
-        // {
-        //     var dir = BotDirector.Instance;
-        //     if (dir == null) { Refl.Print("kickbots: director not running"); return; }
-
-        //     var game = Refl.ServerGame;
-        //     if (game == null) { Refl.Print("kickbots: no active game"); return; }
-
-        //     int kicked = 0;
-
-        //     // Actually remove each bot from the server
-        //     foreach (var agent in dir.Agents.ToList())
-        //     {
-        //         if (agent.Server != null)
-        //         {
-        //             Refl.RemovePlayer(agent.Server);
-        //             kicked++;
-        //         }
-        //     }
-
-        //     // Wait a frame for removals to process, then clear tracking
-        //     UnityEngine.CoroutineRunner.Start(ClearAfterDelay(dir, kicked));
-
-        //     Refl.Print($"kickbots: removed {kicked} bots from the match");
-        // }
-
-        internal static void KickAllBots(string[] args)
-        {
-            var dir = BotDirector.Instance;
-            if (dir == null) { Refl.Print("kickbots: director not running"); return; }
-
-            var game = Refl.ServerGame;
-            if (game == null) { Refl.Print("kickbots: no active game"); return; }
-
-            int count = dir.AgentCount;
-
-            // Clear bot tracking
-            dir.Clear();
-            dir.Wanted = 0;
-
-            // Reset the server to clear all player entries
-            Refl.ResetServer();
-
-            Refl.Print($"kickbots: cleared {count} bots and reset server");
-            Refl.Print("kickbots: RESTART THE MATCH to fully clear loading players");
-        }
-
-
-
-        private static System.Collections.IEnumerator ClearAfterDelay(BotDirector dir, int count)
-        {
-            yield return new UnityEngine.WaitForEndOfFrame();
-            dir.Clear();
-            Plugin.Log.LogInfo($"Cleared bot tracking after kicking {count} bots");
-        }
     }
 }

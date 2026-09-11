@@ -41,7 +41,6 @@ namespace CW.Bots
         private void Awake()
         {
             Instance = this;
-            // CoroutineRunner.Init();
         }
 
         internal BotAgent Agent(object bot)
@@ -61,7 +60,6 @@ namespace CW.Bots
             return a;
         }
 
-        private int _previousPlayerCount = 0;
 
         private void Update()
         {
@@ -78,20 +76,9 @@ namespace CW.Bots
 
             if (!hosting || game == null)
             {
-                if (_agents.Count > 0)
-                {
-                    Plugin.Log.LogInfo($"Match ended - auto-clearing {_agents.Count} bots");
-                    _agents.Clear();
-                    Clear();
-                    Wanted = 0;
-
-                    // Small delay then reset server
-                    System.Threading.Thread.Sleep(100);
-                    Refl.ResetServer();
-                }
+                if (_agents.Count > 0) _agents.Clear();
                 CachedGame = null;
                 _lastMap = string.Empty;
-                _previousPlayerCount = 0;
                 return;
             }
 

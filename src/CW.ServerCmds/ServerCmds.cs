@@ -121,8 +121,8 @@ namespace CW.ServerCmds
                 _setMapName.Invoke(hostInfo, new object[] { _getMapName.Invoke(map, null) });
 
                 var modes = _getMapModes.Invoke(map, null);
-                // _setGameMode.Invoke(info, new object[] { ((IList)modes)[0] });
-                object selectedMode = ((IList)modes)[0]; // Default to first mode
+
+                object selectedMode = ((IList)modes)[0];
 
                 {
                     string modeName = args[1].ToLowerInvariant();
@@ -159,68 +159,6 @@ namespace CW.ServerCmds
                 _setIsHidden.Invoke(null, new object[] { false });
                 _setForceNat.Invoke(info, new object[] { false });
                 _setIsHost.Invoke(null, new object[] { true });
-                // _createServer.Invoke(null, null);
-                try
-                {
-                    // 1. Force clear the Bot Director
-                    var botDirType = Type.GetType("CW.Bots.BotDirector, CW.Bots");
-                    if (botDirType != null)
-                    {
-                        var instanceProp = botDirType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-                        var dir = instanceProp?.GetValue(null, null);
-                        if (dir != null)
-                        {
-                            var clearMethod = botDirType.GetMethod("Clear", BindingFlags.Public | BindingFlags.Instance);
-                            clearMethod?.Invoke(dir, null);
-
-                            var wantedField = botDirType.GetField("Wanted", BindingFlags.Public | BindingFlags.Instance);
-                            wantedField?.SetValue(dir, 0);
-
-                            CwConsole.Print("startserver: cleared bot director from previous match");
-                        }
-                    }
-
-                    // 2. Dynamically find and call a cleanup method on the Server class
-                    var serverClass = _createServer.DeclaringType;
-                    if (serverClass != null)
-                    {
-                        // Look for common cleanup method names in the game's code
-                        string[] cleanupNames = { "ClearPlayers", "DisconnectAll", "Reset", "StopServer", "OnServerShutdown", "Cleanup" };
-                        foreach (var name in cleanupNames)
-                        {
-                            var cleanupMethod = serverClass.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-                            if (cleanupMethod != null)
-                            {
-                                if (cleanupMethod.IsStatic)
-                                {
-                                    cleanupMethod.Invoke(null, null);
-                                    CwConsole.Print($"startserver: called {serverClass.Name}.{name}()");
-                                }
-                                else
-                                {
-                                    // If it's an instance method, try to find a static 'Instance' or 'Current' property
-                                    var instProp = serverClass.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static) ??
-                                                   serverClass.GetProperty("Current", BindingFlags.Public | BindingFlags.Static);
-                                    var inst = instProp?.GetValue(null, null);
-                                    if (inst != null)
-                                    {
-                                        cleanupMethod.Invoke(inst, null);
-                                        CwConsole.Print($"startserver: called {serverClass.Name}.{name}() on instance");
-                                    }
-                                }
-                                break; // Found and called a cleanup method, stop looking
-                            }
-                        }
-                    }
-                }
-                catch (Exception cleanEx)
-                {
-                    CwConsole.Print("startserver cleanup warning: " + cleanEx.Message);
-                }
-                // ==========================================
-                // END: FORCE CLEANUP
-                // ==========================================
-
                 _createServer.Invoke(null, null);
 
                 CwConsole.Print("startserver: hosting map " + idx + " (" + _getMapName.Invoke(map, null) + ")");
